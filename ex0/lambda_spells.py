@@ -22,22 +22,22 @@ def spell_transformer(spells: list[str]) -> list[str]:
 
 def mage_stats(mages: list[dict]) -> dict:
     return {
-        'max_power': lambda mages: max((mage['power'] for mage in mages)),
-        'min_power': lambda mages: min(mage['power'] for mage in mages),
-        'avg_power': lambda mages: round(sum(mages['power'])/len(mages), 2)
+        'max_power': (lambda m: max(mage['power'] for mage in m))(mages),
+        'min_power': (lambda m: min(mage['power'] for mage in m))(mages),
+        'avg_power': (lambda m: round(sum(mage['power'] for mage in m) / len(m), 2))(mages)
         }
 
 
 if __name__ == "__main__":
     def main() -> None:
-        print("Testing artifact sorter...")
+        print("\nTesting artifact sorter...")
         artifacts: list[dict] = [
             {"name": "orb", "type": "Crystal", "power": "85"},
             {"name": "stuff", "power": "92", "type": "Fire"}
             ]
-        
+
         sorted_list = artifact_sorter(artifacts)
-        
+
         ret_artifacts = lambda artifact: (
             f"{artifact['type']} {artifact['name']}"
             f" ({artifact['power']}power)"
@@ -49,9 +49,28 @@ if __name__ == "__main__":
         for arti in sorted_list[2:]:
             print(f"{ret_artifacts(arti)}")
 
+        print("\nTesting power filter...")
+        mages: list[dict] = [
+            {'name': "Alex", "power": 10, 'element': 'fire'},
+            {'name': "Jordan", "power": 20, 'element': 'ice'},
+            {'name': "Riley", "power": 30, 'element': 'lightning'},
+            {'name': "Casey", "power": 40, 'element': 'earth'},
+            {'name': "Morgan", "power": 50, 'element': 'wind'}
+        ]
+        for mage in power_filter(mages, 30):
+            print(
+                f"{mage['name']}: {mage['power']}, {mage['element']}",
+                end="")
+
+        print("\n\nTesting spell transformer...")
+        spells: list[str] = ["fireball", "heal", "shield"]
         spells_join = lambda spells: "".join(spells)
-        print("Testing spell transformer...")
-        spells: 
         print(spells_join(spell_transformer(spells)))
+
+        print("\nTesting mage_stats")
+        stats: dict = mage_stats(mages)
+        params: list[str] = ["max_power", "min_power", "avg_power"]
+        for i in range(len(params)):
+            print(f"{params[i]}: {stats[params[i]]}")
 
     main()
