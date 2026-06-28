@@ -11,7 +11,7 @@ def spell_timer(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         print(f"Casting function {func.__name__}")
         start = time.perf_counter()
-        ret = func()
+        ret = func(*args, **kwargs)
         end = time.perf_counter()
         print("Spell completed in {:.2f} seconds".format(end - start))
         return ret
@@ -36,7 +36,7 @@ def retry_spell(max_attempts: int) -> Callable:
         def wrapper(*arg, **kwargs):
             for cnt_try in range(1, max_attempts+1):
                 try:
-                    ret = func(*arg, *kwargs)
+                    ret = func(*arg, **kwargs)
                     return ret
                 except Exception:
                     print(
@@ -62,6 +62,7 @@ class MageGuild:
     def cast_spell(self, spell_name: str, power: int) -> str:
         return f"Successfully cast {spell_name} with <{power}> power"
 
+    @staticmethod
     @spell_timer
     def fireball() -> None:
         print("Testing spell timer...")
@@ -69,6 +70,7 @@ class MageGuild:
         time.sleep(1.23)
         print("Result: Fireball cast!")
 
+    @staticmethod
     @retry_spell(5)
     def waaaaaaagh() -> str:
         i: int = random.randint(0, 9)
@@ -87,7 +89,7 @@ if __name__ == "__main__":
 
         print()
         print("Testing retrying spell...")
-        mg.waaaaaaagh()
+        print(mg.waaaaaaagh())
 
         print()
         print("Testing MageGuild...")
