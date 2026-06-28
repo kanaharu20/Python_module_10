@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 from functools import reduce, partial, lru_cache, singledispatch
 import operator
 
@@ -13,14 +14,15 @@ def spell_reducer(spells: list[int], operation: str) -> int:
     elif operation == "multiply":
         return reduce(operator.mul, spells)
     elif operation == "max":
-        return max(spells)
+        return reduce(lambda a, b: a if a > b else b, spells)
     elif operation == "min":
-        return min(spells)
+        return reduce(lambda a, b: a if a < b else b, spells)
     else:
-        print("Given operator is not supported.")
+        raise ValueError(f"Unknown operation: {operation}")
 
 
-def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
+def partial_enchanter(
+        base_enchantment: Callable[..., Any]) -> dict[str, Callable[..., Any]]:
     heal = partial(base_enchantment, power=50, element="heal")
     fireball = partial(base_enchantment, power=50, element="fireball")
     iceball = partial(base_enchantment, power=50, element="iceball")
@@ -41,19 +43,19 @@ def memoized_fibonacci(n: int) -> int:
 
 def spell_dispatcher() -> Callable[[Any], str]:
     @singledispatch
-    def spell_process(arg: Any) -> str:
+    def spell_process(_: Any) -> str:
         return "Unknown spell type"
 
     @spell_process.register(int)
-    def int_process(arg: int) -> str:
-        return f"{arg} damege"
+    def _(arg: int) -> str:
+        return f"{arg} damage"
 
     @spell_process.register(str)
-    def str_process(arg: str) -> str:
+    def _(arg: str) -> str:
         return arg
 
     @spell_process.register(list)
-    def list_process(arg: list) -> str:
+    def _(arg: list[Any]) -> str:
         return f"{len(arg)} spells"
 
     return spell_process
@@ -63,9 +65,9 @@ if __name__ == "__main__":
     def main() -> None:
         print("\nTesting spell reducer...")
         spells: list[int] = [40, 10, 20, 30]
-        print(f"Sun: {spell_reducer(spells, "add")}")
-        print(f"Product: {spell_reducer(spells, "multiply")}")
-        print(f"Max: {spell_reducer(spells, "max")}")
+        print(f"Sum: {spell_reducer(spells, 'add')}")
+        print(f"Product: {spell_reducer(spells, 'multiply')}")
+        print(f"Max: {spell_reducer(spells, 'max')}")
 
         print()
         print("Testing memoized fibonacci...")
@@ -78,7 +80,7 @@ if __name__ == "__main__":
         print("Testing spell dispatcher...")
         ex_dispatcher = spell_dispatcher()
         print(f"Damage spell: {ex_dispatcher(42)}")
-        print(f"Enchantment: {ex_dispatcher("fireball")}")
+        print(f"Enchantment: {ex_dispatcher('fireball')}")
         spells_list: list[str] = ["fireball", "iceball", "heal"]
         print(f"Multi-cast: {ex_dispatcher(spells_list)}")
         print(f"{ex_dispatcher((1, 2))}")
